@@ -13,7 +13,7 @@ public class ImageBackgroundPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        // Draw the image to fill the entire panel
+        // Draw image to fill the entire panel
         g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
     }
 }
