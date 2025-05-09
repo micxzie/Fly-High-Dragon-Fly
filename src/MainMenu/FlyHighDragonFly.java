@@ -12,9 +12,13 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     //Variables for initializing the images
     Image backgroundImg;
+    Image background1Img;
+    Image background2Img;
+    Image background3Img;
     Image dragonImg;
     Image topPipeImg;
     Image bottomPipeImg;
+    Image gameOverImg;
 
     // Main Buttons when game is over
     JButton playAgainButton = new JButton(new ImageIcon(new ImageIcon("src/img/PlayAgain.png").getImage().getScaledInstance(150, 35, Image.SCALE_SMOOTH)));
@@ -44,7 +48,8 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         }
     }
 
-    //Pipes
+    //For Pipes
+    ArrayList<Pipe> pipes;
     int pipeX = boardWidth;
     int pipeY = 0;
     int pipeWidth = 64;
@@ -68,12 +73,8 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     int velocityX = -4; //speed of moving pipes to the left (simulates dragon moving right)
     int velocityY = 0;
     int gravity = 1;
-
-    ArrayList<Pipe> pipes;
-
     Timer gameLoop;
     Timer placePipesTimer;
-
     boolean gameOver = false;
     double score = 0;
     int finalScore = 0;
@@ -89,22 +90,26 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         setLayout(null);
 
         //Loading in the images
-        backgroundImg = new ImageIcon("src/img/gamebg.png").getImage();
-        dragonImg = new ImageIcon("src/img/VERY FINAL.gif").getImage();
+        background1Img = new ImageIcon("src/img/gamebg.png").getImage();
+        dragonImg = new ImageIcon("src/img/dragonfly.png").getImage();
         topPipeImg = new ImageIcon("src/img/toppipefinal.png").getImage();
         bottomPipeImg = new ImageIcon("src/img/bottompipefinal.png").getImage();
+        background2Img = new ImageIcon("src/img/background2.png").getImage();
+        background3Img = new ImageIcon("src/img/background3.png").getImage();
+        gameOverImg = new ImageIcon("src/img/gameover.png").getImage(); // Load game over image
 
-        //handle dragon and pipes
+        backgroundImg = background1Img;
+        //Handle dragon and pipes
         dragon = new Dragon(dragonImg);
         pipes = new ArrayList<Pipe>();
 
-        //buttons on top during game play
+        //Buttons on top during game play
         buttons();
 
-        //buttons when game is over
+        //Buttons when game is over
         overButton();
 
-        //place pipes timer
+        //Place pipes timer
         placePipesTimer = new Timer(1500, new ActionListener() { //this will add pipes every 1.5 seconds
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,7 +118,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         });
         placePipesTimer.start();
 
-        //game timer
+        //Game timer
         gameLoop = new Timer(1000/60, this); //we do 60 frames per second so 1000/60
         gameLoop.start();
 
@@ -163,7 +168,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             score = 0;
             gameLoop.start();
             placePipesTimer.start();
-            backgroundImg = new ImageIcon("img/gamebg.png").getImage();
+            backgroundImg = background2Img;
         });
 
         menuMiniButton.setBounds(75, 6, 30, 30);
@@ -193,7 +198,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             pauseButton.setVisible(true);
             retryButton.setVisible(true);
             menuMiniButton.setVisible(true);
-            backgroundImg = new ImageIcon("src/img/gamebg.png").getImage();
+            backgroundImg = background1Img;
         });
         add(playAgainButton);
 
@@ -241,20 +246,23 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        //This is where we update the background and pipes
-        // learn how to fade
-        if(score >= 3){
-            backgroundImg = new ImageIcon("src/img/night.jpg").getImage(); //placeholder
+        //This is where we update the background
+        if(score >= 12){
+            backgroundImg = background3Img;
         }
 
-        draw(g); //draw pipes, draw, and score
+        if(score >= 5){
+            backgroundImg = background2Img;
+        }
+
+        draw(g); //draw pipes, background, and score
         if (gameOver) {
             int panelSize = 200;
             int x = (getWidth() - panelSize) / 2;
             int y = (getHeight() - panelSize) / 2;
 
             // Background
-            Image gameOver = new ImageIcon("src/img/gameover.png").getImage();
+            Image gameOver = gameOverImg;
             g2d.drawImage(gameOver, x-10, y, null);
 
             // Text
@@ -262,31 +270,23 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             g2d.setFont(new Font("Arial", Font.BOLD, 30));
             g2d.drawString(String.valueOf((int) score), x + 95,  y + 80);
             finalScore = (int)score;
-
-            playAgainButton.setBounds(x + 40, y+98, 130, 35);
-            addScore.setBounds(x + 40, y+145, 130, 35);
-            menuButton.setBounds(x + 40, y+185, 130, 35);
-
-            playAgainButton.setVisible(true);
-            menuButton.setVisible(true);
-            addScore.setVisible(true);
         }
     }
 
     public void draw(Graphics g){
-        //background
+        //Background
         g.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight, null);
 
-        //dragon
+        //Dragon
         g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, null);
 
-        //pipes
+        //Pipes
         for(int i = 0; i < pipes.size(); i++){
             Pipe pipe = pipes.get(i); //get index of pipe
             g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
         }
 
-        //score display during in game
+        //Score display during in game
         g.setColor(Color.white);
         g.setFont(new Font("Arial", Font.BOLD, 40));
         if(!gameOver){
@@ -295,24 +295,26 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     }
 
     public void move(){
-        //bird
+        //Dragon
         velocityY += gravity;
         dragon.y += velocityY;
-        dragon.y = Math.max(dragon.y, 0); //limit the birds movement upwards, stops at the top
+        dragon.y = Math.max(dragon.y, 0);
 
         //pipes
-        for(int i = 0; i < pipes.size(); i++){
+        // Iterate backwards to safely remove elements by index
+        for(int i = pipes.size() - 1; i >= 0; i--){
             Pipe pipe = pipes.get(i);
-            pipe.x += velocityX; //every frame, we move each pipe over by -4 to the left
+            pipe.x += velocityX;
 
-            /*This is where we update speed of pipes moving
-            if(score >= 3){
-                pipe.x += velocityX + 1;
-            }*/
+            // Check if the pipe is completely off-screen to the left
+            if (pipe.x + pipe.width < 0) {
+                pipes.remove(i); // Safe to remove when iterating backwards
+                continue; // Skip further processing for this removed pipe
+            }
 
-            if(!pipe.passed && dragon.x > pipe.x + pipe.width){ //explanation in vid 47:00
+            if(!pipe.passed && dragon.x > pipe.x + pipe.width){
                 pipe.passed = true;
-                score += 0.5; //0.5 bcs there are 2 pipes bird passes through, 0.5*2 = 1 for each set of pipes
+                score += 0.5;
             }
 
             if(collision(dragon, pipe)){
@@ -342,6 +344,17 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             pauseButton.setVisible(false);
             retryButton.setVisible(false);
             menuMiniButton.setVisible(false);
+
+
+            int panelSize = 200;
+            int x = (getWidth() - panelSize) / 2;
+            int y = (getHeight() - panelSize) / 2;
+            playAgainButton.setBounds(x + 40, y+98, 130, 35);
+            addScore.setBounds(x + 40, y+145, 130, 35);
+            menuButton.setBounds(x + 40, y+185, 130, 35);
+            playAgainButton.setVisible(true);
+            menuButton.setVisible(true);
+            addScore.setVisible(true);
         }
     }
 
