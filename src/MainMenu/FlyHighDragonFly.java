@@ -90,9 +90,9 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
         //Loading in the images
         backgroundImg = new ImageIcon("src/img/gamebg.png").getImage();
-        dragonImg = new ImageIcon("src/img/dragonfly.png").getImage();
-        topPipeImg = new ImageIcon("src/img/toppipe.png").getImage();
-        bottomPipeImg = new ImageIcon("src/img/bottompipe.png").getImage();
+        dragonImg = new ImageIcon("src/img/VERY FINAL.gif").getImage();
+        topPipeImg = new ImageIcon("src/img/toppipefinal.png").getImage();
+        bottomPipeImg = new ImageIcon("src/img/bottompipefinal.png").getImage();
 
         //handle dragon and pipes
         dragon = new Dragon(dragonImg);
