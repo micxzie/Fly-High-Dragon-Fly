@@ -10,35 +10,26 @@ public class Menu extends JFrame {
     ImageBackgroundPanel backgroundPanel = new ImageBackgroundPanel("src/img/First.png");
     ImageBackgroundPanel instructionsPanel = new ImageBackgroundPanel("src/img/HowToPlay.png");
 
-    //Play Button
-    Image originalPlay = new ImageIcon("src/img/PlayButton.png").getImage();
-    Image scaledPlay = originalPlay.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
-    ImageIcon playIcon = new ImageIcon(scaledPlay);
+    // Play Button
+    ImageIcon playIcon = new ImageIcon(new ImageIcon("src/img/PlayButton.png").getImage().getScaledInstance(135, 45, Image.SCALE_SMOOTH));
     JButton PlayButton = new JButton(playIcon);
 
-    //Score Button
-    Image originalScore = new ImageIcon("src/img/Scores.png").getImage();
-    Image scaledScore = originalScore.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
-    ImageIcon ScoreIcon = new ImageIcon(scaledScore);
-    JButton ScoreButton = new JButton(ScoreIcon);
+    // Score Button
+    ImageIcon scoreIcon = new ImageIcon(new ImageIcon("src/img/Scores.png").getImage().getScaledInstance(135, 45, Image.SCALE_SMOOTH));
+    JButton ScoreButton = new JButton(scoreIcon);
 
-    //How To Play Button
-    Image originalHow = new ImageIcon("src/img/How.png").getImage();
-    Image scaledHow = originalHow.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
-    ImageIcon HowIcon = new ImageIcon(scaledHow);
-    JButton InstructionsButton = new JButton(HowIcon);
+    // How To Play Button
+    ImageIcon howIcon = new ImageIcon(new ImageIcon("src/img/How.png").getImage().getScaledInstance(135, 45, Image.SCALE_SMOOTH));
+    JButton InstructionsButton = new JButton(howIcon);
 
-    //ExitButton
-    Image originalQuit = new ImageIcon("src/img/Quit.png").getImage();
-    Image scaledQuit = originalQuit.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
-    ImageIcon QuitIcon = new ImageIcon(scaledQuit);
-    JButton ExitButton = new JButton(QuitIcon);
+    // Exit Button
+    ImageIcon quitIcon = new ImageIcon(new ImageIcon("src/img/Quit.png").getImage().getScaledInstance(135, 45, Image.SCALE_SMOOTH));
+    JButton ExitButton = new JButton(quitIcon);
 
-    //Back button on How to Play Panel
-    Image originalBack = new ImageIcon("src/img/Back.png").getImage();
-    Image scaledBack = originalBack.getScaledInstance(80, 26, Image.SCALE_SMOOTH);
-    ImageIcon BackIcon = new ImageIcon(scaledBack);
-    JButton returnButton = new JButton(BackIcon);
+    // Back Button
+    ImageIcon backIcon = new ImageIcon(new ImageIcon("src/img/Back.png").getImage().getScaledInstance(80, 26, Image.SCALE_SMOOTH));
+    JButton returnButton = new JButton(backIcon);
+
 
     public Menu() {
         setSize(boardWidth, boardHeight);
