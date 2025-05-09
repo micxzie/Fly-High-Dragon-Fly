@@ -13,19 +13,19 @@ public class Menu extends JFrame {
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        ImageBackgroundPanel backgroundPanel = new ImageBackgroundPanel("First.png");
+        ImageBackgroundPanel backgroundPanel = new ImageBackgroundPanel("src/img/First.png");
         backgroundPanel.setLayout(null);
         backgroundPanel.setBounds(0, 0, boardWidth, boardHeight);
 
         //BUTTONS
-        Image originalPlay = new ImageIcon("PlayButton.png").getImage();
+        Image originalPlay = new ImageIcon("src/img/PlayButton.png").getImage();
         Image scaledPlay = originalPlay.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
         ImageIcon playIcon = new ImageIcon(scaledPlay);
         JButton PlayButton = new JButton(playIcon);
         PlayButton.setFocusable(false);
         PlayButton.setBounds(113, 268, 135, 45);
 
-        Image originalScore = new ImageIcon("Scores.png").getImage();
+        Image originalScore = new ImageIcon("src/img/Scores.png").getImage();
         Image scaledScore = originalScore.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
         ImageIcon ScoreIcon = new ImageIcon(scaledScore);
         JButton ScoreButton = new JButton(ScoreIcon);
@@ -33,7 +33,7 @@ public class Menu extends JFrame {
         ScoreButton.setBounds(113, 342, 135, 45);
 
 
-        Image originalHow = new ImageIcon("How.png").getImage();
+        Image originalHow = new ImageIcon("src/img/How.png").getImage();
         Image scaledHow = originalHow.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
         ImageIcon HowIcon = new ImageIcon(scaledHow);
         JButton InstructionsButton = new JButton(HowIcon);
@@ -41,7 +41,7 @@ public class Menu extends JFrame {
         InstructionsButton.setBounds(113, 417, 135, 45);
 
 
-        Image originalQuit = new ImageIcon("Quit.png").getImage();
+        Image originalQuit = new ImageIcon("src/img/Quit.png").getImage();
         Image scaledQuit = originalQuit.getScaledInstance(135, 45, Image.SCALE_SMOOTH);
         ImageIcon QuitIcon = new ImageIcon(scaledQuit);
         JButton ExitButton = new JButton(QuitIcon);
@@ -56,12 +56,12 @@ public class Menu extends JFrame {
 
 
         //INSTRUCTION BUTTON
-        ImageBackgroundPanel instructionsPanel = new ImageBackgroundPanel("HowToPlay.png");
+        ImageBackgroundPanel instructionsPanel = new ImageBackgroundPanel("src/img/HowToPlay.png");
         instructionsPanel.setLayout(null);
         instructionsPanel.setBounds(0, 0, boardWidth, boardHeight);
 
         // ig adjust ta nala position han return button based aton image han instructions
-        Image originalBack = new ImageIcon("Back.png").getImage();
+        Image originalBack = new ImageIcon("src/img/Back.png").getImage();
         Image scaledBack = originalBack.getScaledInstance(80, 26, Image.SCALE_SMOOTH);
         ImageIcon BackIcon = new ImageIcon(scaledBack);
         JButton returnButton = new JButton(BackIcon);

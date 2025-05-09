@@ -73,33 +73,33 @@ public class FlyHighDragonFly extends JPanel implements ActionListener, KeyListe
     JLabel resumeLabel = new JLabel("<html><div style='text-align: center;'>Press the Space bar<br>to resume</html>");
 
     //Buttons when game is over
-    Image originalPlayAgain = new ImageIcon("PlayAgain.png").getImage();
+    Image originalPlayAgain = new ImageIcon("src/img/PlayAgain.png").getImage();
     Image scaledPlayAgain = originalPlayAgain.getScaledInstance(150, 35, Image.SCALE_SMOOTH);
     ImageIcon scaledPlayAgainIcon = new ImageIcon(scaledPlayAgain);
     JButton playAgainButton = new JButton(scaledPlayAgainIcon);
 
-    Image originalMenuButton = new ImageIcon("ReturnMenu.png").getImage();
+    Image originalMenuButton = new ImageIcon("src/img/ReturnMenu.png").getImage();
     Image scaledMenuButton = originalMenuButton.getScaledInstance(150, 35, Image.SCALE_SMOOTH);
     ImageIcon scaledMenuIcon = new ImageIcon(scaledMenuButton);
     JButton menuButton = new JButton(scaledMenuIcon);
 
-    Image originalAddScore = new ImageIcon("RecordScores.png").getImage();
+    Image originalAddScore = new ImageIcon("src/img/RecordScores.png").getImage();
     Image scaledAddScore = originalAddScore.getScaledInstance(150, 35, Image.SCALE_SMOOTH);
     ImageIcon scaledAddScoreIcon = new ImageIcon(scaledAddScore);
     JButton addScore = new JButton(scaledAddScoreIcon);
 
     //Buttons on top
-    Image originalPause = new ImageIcon("Pause.png").getImage();
+    Image originalPause = new ImageIcon("src/img/Pause.png").getImage();
     Image scaledPause = originalPause.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
     ImageIcon PauseIcon = new ImageIcon(scaledPause);
     JButton pauseButton = new JButton(PauseIcon);
 
-    Image originalRetry = new ImageIcon("Retry.png").getImage(); //placeholder image
+    Image originalRetry = new ImageIcon("src/img/Retry.png").getImage(); //placeholder image
     Image scaledRetry = originalRetry.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
     ImageIcon RetryIcon = new ImageIcon(scaledRetry);
     JButton retryButton = new JButton(RetryIcon);
 
-    Image originalMenu = new ImageIcon("Menu.png").getImage(); //placeholder image
+    Image originalMenu = new ImageIcon("src/img/Menu.png").getImage(); //placeholder image
     Image scaledMenu = originalMenu.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
     ImageIcon MenuIcon = new ImageIcon(scaledMenu);
     JButton menuMiniButton = new JButton(MenuIcon);
@@ -111,10 +111,10 @@ public class FlyHighDragonFly extends JPanel implements ActionListener, KeyListe
         addMouseListener(this);
         setLayout(null);
 
-        backgroundImg = new ImageIcon("gamebg.png").getImage();
-        dragonImg = new ImageIcon("dragonfly.png").getImage();
-        topPipeImg = new ImageIcon("toppipe.png").getImage();
-        bottomPipeImg = new ImageIcon("bottompipe.png").getImage();
+        backgroundImg = new ImageIcon("src/img/gamebg.png").getImage();
+        dragonImg = new ImageIcon("src/img/dragonfly.png").getImage();
+        topPipeImg = new ImageIcon("src/img/toppipe.png").getImage();
+        bottomPipeImg = new ImageIcon("src/img/bottompipe.png").getImage();
 
         //birb
         dragon = new Dragon(dragonImg);
@@ -185,7 +185,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener, KeyListe
             score = 0;
             gameLoop.start();
             placePipesTimer.start();
-            backgroundImg = new ImageIcon("gamebg.png").getImage();
+            backgroundImg = new ImageIcon("img/gamebg.png").getImage();
         });
 
         menuMiniButton.setBounds(75, 6, 30, 30);
@@ -215,7 +215,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener, KeyListe
             pauseButton.setVisible(true);
             retryButton.setVisible(true);
             menuMiniButton.setVisible(true);
-            backgroundImg = new ImageIcon("gamebg.png").getImage();
+            backgroundImg = new ImageIcon("src/img/gamebg.png").getImage();
         });
         add(playAgainButton);
 
@@ -267,7 +267,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener, KeyListe
         //This is where we update the background and pipes
         // learn how to fade
         if(score >= 3){
-            backgroundImg = new ImageIcon("night.jpg").getImage(); //placeholder
+            backgroundImg = new ImageIcon("src/img/night.jpg").getImage(); //placeholder
         }
 
         draw(g); //draw pipes, bird, and score
@@ -278,7 +278,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener, KeyListe
 
 
             // Background
-            Image gameOver = new ImageIcon("gameover.png").getImage();
+            Image gameOver = new ImageIcon("src/img/gameover.png").getImage();
             g2d.drawImage(gameOver, x-10, y, null);
 
             // Text
