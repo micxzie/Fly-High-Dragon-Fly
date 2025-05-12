@@ -392,7 +392,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     public void drawGameElements(Graphics g){
         // Dragon
-        g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, null);
+        g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, this);
 
         // Pipes
         for(int i = 0; i < pipes.size(); i++){
