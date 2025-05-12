@@ -10,8 +10,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     int boardWidth = 360;
     int boardHeight = 640;
 
-    //Variables for initializing the images
-    Image backgroundImg;
+    // Variables for initializing the images
     Image background1Img;
     Image background2Img;
     Image background3Img;
@@ -19,6 +18,16 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     Image topPipeImg;
     Image bottomPipeImg;
     Image gameOverImg;
+
+    // Variables for transitioning the images using alpha composite
+    private Image currentDrawingBackground;
+    private Image targetTransitionBackground;
+    private boolean isTransitioning = false;
+    private float transitionAlpha = 0.0f;
+    private Timer transitionTimer;
+    private static final int TRANSITION_DURATION_MS = 1000; // 1 second fade
+    private static final int TIMER_DELAY_MS = 20;          // Approx 50 FPS
+    private float alphaIncrement;
 
     // Main Buttons when game is over
     JButton playAgainButton = new JButton(new ImageIcon(new ImageIcon("src/img/PlayAgain.png").getImage().getScaledInstance(150, 35, Image.SCALE_SMOOTH)));
@@ -33,7 +42,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     //For Dragon
     int DragonX = boardWidth/8; //place dragon 1/8 from the left
     int DragonY = boardHeight/2; //place dragon center, 1/2 from the top
-    int dragonWidth = 50; //size of dragon
+    int dragonWidth = 70; //size of dragon
     int dragonHeight = 50;
 
     class Dragon {
@@ -48,7 +57,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         }
     }
 
-    //For Pipes
+    // For Pipes
     ArrayList<Pipe> pipes;
     int pipeX = boardWidth;
     int pipeY = 0;
@@ -68,7 +77,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         }
     }
 
-    //Game logic variables
+    // Game logic variables
     Dragon dragon;
     int velocityX = -4; //speed of moving pipes to the left (simulates dragon moving right)
     int velocityY = 0;
@@ -89,68 +98,97 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         addMouseListener(mouseListener);
         setLayout(null);
 
-        //Loading in the images
+        // Loading in the images
         background1Img = new ImageIcon("src/img/gamebg.png").getImage();
-        dragonImg = new ImageIcon("src/img/dragonfly.png").getImage();
+        dragonImg = new ImageIcon("src/img/SPRITEFINAL.gif").getImage();
         topPipeImg = new ImageIcon("src/img/toppipefinal.png").getImage();
         bottomPipeImg = new ImageIcon("src/img/bottompipefinal.png").getImage();
         background2Img = new ImageIcon("src/img/background2.png").getImage();
         background3Img = new ImageIcon("src/img/background3.png").getImage();
         gameOverImg = new ImageIcon("src/img/gameover.png").getImage(); // Load game over image
 
-        backgroundImg = background1Img;
-        //Handle dragon and pipes
+        currentDrawingBackground = background1Img;
+        // Handle dragon and pipes
         dragon = new Dragon(dragonImg);
-        pipes = new ArrayList<Pipe>();
+        pipes = new ArrayList<>();
 
-        //Buttons on top during game play
+        // Buttons on top during game play
         buttons();
 
-        //Buttons when game is over
+        // Buttons when game is over
         overButton();
 
-        //Place pipes timer
+        // Place pipes timer
         placePipesTimer = new Timer(1500, new ActionListener() { //this will add pipes every 1.5 seconds
             @Override
             public void actionPerformed(ActionEvent e) {
-                placePipes();
+                if(!paused){
+                    placePipes();
+                }
             }
         });
         placePipesTimer.start();
 
-        //Game timer
+        // Game timer
         gameLoop = new Timer(1000/60, this); //we do 60 frames per second so 1000/60
-        gameLoop.start();
 
-        //In-game text
+        // In-game text
         resumeLabel.setFont(new Font("Arial", Font.BOLD, 25));
         resumeLabel.setForeground(Color.WHITE);
         resumeLabel.setBounds(65, 240, 240, 50);
         add(resumeLabel);
         resumeLabel.setVisible(false);
+
+        // Set up the transition timer for background changes
+        setupTransitionTimer();
+
+        // Start game
+        startGameTimers();
+    }
+
+    // Helper to start/resume game timers
+    private void startGameTimers() {
+        if (!paused && !gameOver) {
+            placePipesTimer.start();
+            gameLoop.start();
+        }
+    }
+
+    // Helper to stop game timers
+    private void stopGameTimers() {
+        placePipesTimer.stop();
+        gameLoop.stop();
     }
 
     public void buttons(){
-        //buttons on top
+        // Buttons on top
         pauseButton.setBounds(5, 6, 30, 30);
         pauseButton.setFocusable(false);
         add(pauseButton);
         pauseButton.addActionListener(e -> {
-            paused = true;
-            gameLoop.stop();
-            placePipesTimer.stop();
-            resumeLabel.setVisible(true);
+            if (!gameOver) {
+                paused = true;
+                stopGameTimers();
+                if (transitionTimer.isRunning()) {
+                    transitionTimer.stop();
+                }
+                resumeLabel.setVisible(true);
+            }
         });
 
-        //resume the game using space bar
+        // Resume the game using space bar
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE && paused) {
-                    paused = false;
-                    gameLoop.start();
-                    placePipesTimer.start();
-                    resumeLabel.setVisible(false);
+                    if (!gameOver) { // Resume game
+                        paused = false;
+                        startGameTimers();
+                        if (isTransitioning) { // Resume transition timer if it was running
+                            transitionTimer.start();
+                        }
+                        resumeLabel.setVisible(false);
+                    }
                 }
             }
         });
@@ -161,14 +199,21 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         retryButton.setFocusable(false);
         add(retryButton);
         retryButton.addActionListener(e -> {
+            if (transitionTimer.isRunning()) { // Stop any ongoing transition
+                transitionTimer.stop();
+                isTransitioning = false;
+            }
             gameOver = false;
             dragon.y = DragonY;
             velocityY = 0;
             pipes.clear();
             score = 0;
-            gameLoop.start();
-            placePipesTimer.start();
-            backgroundImg = background2Img;
+            finalScore = 0;
+            currentDrawingBackground = background1Img; // Reset to initial background
+            targetTransitionBackground = null;
+            checkAndUpdateBackground();
+
+            startGameTimers(); // Restart game timers
         });
 
         menuMiniButton.setBounds(75, 6, 30, 30);
@@ -185,23 +230,29 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         playAgainButton.setFocusable(false);
         playAgainButton.setVisible(false);
         playAgainButton.addActionListener(e -> {
+            if (transitionTimer.isRunning()) { // Stop any ongoing transition
+                transitionTimer.stop();
+                isTransitioning = false;
+            }
             gameOver = false;
             dragon.y = DragonY;
             velocityY = 0;
             pipes.clear();
             score = 0;
-            gameLoop.start();
-            placePipesTimer.start();
+            finalScore = 0; // Reset final score
+            currentDrawingBackground = background1Img; // Reset to initial background
+            targetTransitionBackground = null; // Clear any pending transition target
+            checkAndUpdateBackground(); // Ensure correct background is set (should be background1Img)
+
+            startGameTimers(); // Use helper to restart game timers
             playAgainButton.setVisible(false);
             menuButton.setVisible(false);
             addScore.setVisible(false);
             pauseButton.setVisible(true);
             retryButton.setVisible(true);
             menuMiniButton.setVisible(true);
-            backgroundImg = background1Img;
         });
         add(playAgainButton);
-
 
         menuButton.setFocusable(false);
         menuButton.setVisible(false);
@@ -212,7 +263,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         });
         add(menuButton);
 
-        //Study this, how to store data
+        // Study this, how to store data
         addScore.setFocusable(false);
         addScore.setVisible(false);
         addScore.addActionListener(e -> {
@@ -243,19 +294,85 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         pipes.add(bottomPipe);
     }
 
+    // This method is for transitioning the background images smoothly
+    private void setupTransitionTimer() {
+        int steps = TRANSITION_DURATION_MS / TIMER_DELAY_MS;
+        if (steps == 0) steps = 1;
+        alphaIncrement = 1.0f / steps;
+
+        transitionTimer = new Timer(TIMER_DELAY_MS, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                transitionAlpha += alphaIncrement;
+                if (transitionAlpha >= 1.0f) {
+                    transitionAlpha = 1.0f;
+                    currentDrawingBackground = targetTransitionBackground;
+                    isTransitioning = false;
+                    targetTransitionBackground = null;
+                    transitionTimer.stop();
+                }
+                repaint(); //Trigger a repaint to draw the next frame of the transition
+            }
+        });
+    }
+
+    public void checkAndUpdateBackground() {
+        Image newTargetBg = null;
+
+        if (score >= 12) {
+            newTargetBg = background3Img;
+        } else if (score >= 5) {
+            newTargetBg = background2Img;
+        } else {
+            newTargetBg = background1Img; // Default background
+        }
+
+        // Start a transition if the target background is different
+        // AND we are not already transitioning to it
+        // AND it's different from the current base drawing background
+        if (newTargetBg != null && newTargetBg != currentDrawingBackground &&
+                (!isTransitioning || targetTransitionBackground != newTargetBg)) {
+
+            if (transitionTimer.isRunning()) {
+                // If a transition is already running to a *different* target,
+                // we let currentDrawingBackground be what it is (the base of the current fade)
+                // and start a new fade from that to newTargetBg.
+                // If it was transitioning to the *same* newTargetBg, this condition wouldn't be met.
+                transitionTimer.stop();
+            }
+
+            targetTransitionBackground = newTargetBg;
+            isTransitioning = true;
+            transitionAlpha = 0.0f; // Reset alpha for the new transition
+            transitionTimer.start();
+        } else if (newTargetBg == currentDrawingBackground && isTransitioning) {
+            // This case handles if the score changes back to require the 'currentDrawingBackground'
+            // while it was transitioning *away* from it.
+            transitionTimer.stop();
+            isTransitioning = false;
+            targetTransitionBackground = null;
+            repaint();
+        }
+    }
+
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         //This is where we update the background
-        if(score >= 12){
-            backgroundImg = background3Img;
+        // 1. Draw the current (or old) background
+        if (currentDrawingBackground != null) {
+            g2d.drawImage(currentDrawingBackground, 0, 0, boardWidth, boardHeight, null);
         }
 
-        if(score >= 5){
-            backgroundImg = background2Img;
+        // 2. If transitioning, draw the new background on top with increasing alpha
+        if (isTransitioning && targetTransitionBackground != null) {
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, transitionAlpha));
+            g2d.drawImage(targetTransitionBackground, 0, 0, boardWidth, boardHeight, null);
+            // Reset composite to default for any subsequent drawing operations
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
         }
 
-        draw(g); //draw pipes, background, and score
+        drawGameElements(g2d); //Draw pipes, background, and score
         if (gameOver) {
             int panelSize = 200;
             int x = (getWidth() - panelSize) / 2;
@@ -265,7 +382,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             Image gameOver = gameOverImg;
             g2d.drawImage(gameOver, x-10, y, null);
 
-            // Text
+            // Show score when game is over
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 30));
             g2d.drawString(String.valueOf((int) score), x + 95,  y + 80);
@@ -273,14 +390,11 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         }
     }
 
-    public void draw(Graphics g){
-        //Background
-        g.drawImage(backgroundImg, 0, 0, boardWidth, boardHeight, null);
-
-        //Dragon
+    public void drawGameElements(Graphics g){
+        // Dragon
         g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, null);
 
-        //Pipes
+        // Pipes
         for(int i = 0; i < pipes.size(); i++){
             Pipe pipe = pipes.get(i); //get index of pipe
             g.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height, null);
@@ -295,13 +409,14 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     }
 
     public void move(){
-        //Dragon
+        if (paused || gameOver) return; // Don't move if paused or game over
+
+        // Dragon
         velocityY += gravity;
         dragon.y += velocityY;
         dragon.y = Math.max(dragon.y, 0);
 
-        //pipes
-        // Iterate backwards to safely remove elements by index
+        // Pipes, iterate backwards to safely remove elements by index
         for(int i = pipes.size() - 1; i >= 0; i--){
             Pipe pipe = pipes.get(i);
             pipe.x += velocityX;
@@ -315,15 +430,20 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             if(!pipe.passed && dragon.x > pipe.x + pipe.width){
                 pipe.passed = true;
                 score += 0.5;
+                checkAndUpdateBackground(); // Change background
             }
 
             if(collision(dragon, pipe)){
                 gameOver = true;
+                finalScore = (int)score;
             }
         }
 
         if(dragon.y > boardHeight){
             gameOver = true;
+            finalScore = (int)score;
+
+            checkAndUpdateBackground();
         }
     }
 
@@ -336,11 +456,17 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        move();
-        repaint(); //calls paint method
+        if (!paused && !gameOver) {
+            move();
+        }
+        repaint();
+
         if(gameOver){
-            placePipesTimer.stop(); //stop adding pipes to arraylist
-            gameLoop.stop(); //stops repainting
+            stopGameTimers();
+            if (transitionTimer.isRunning()) { // Stop transition if game ends mid-transition
+                transitionTimer.stop();
+                isTransitioning = false; // Ensure state is clean
+            }
             pauseButton.setVisible(false);
             retryButton.setVisible(false);
             menuMiniButton.setVisible(false);
