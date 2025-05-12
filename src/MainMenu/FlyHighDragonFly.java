@@ -14,10 +14,21 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     Image background1Img;
     Image background2Img;
     Image background3Img;
-    Image dragonImg;
+    //Image dragonImg;
     Image topPipeImg;
     Image bottomPipeImg;
     Image gameOverImg;
+
+    // Variables for Dragon Sprite Animation
+    Image dragonSpriteSheet;
+    int dragonFrameWidth = 60;
+    int dragonFrameHeight = 60;
+    int dragonTotalFrames = 3;
+    int dragonCurrentFrame = 0;
+
+    int dragonAnimationTick = 0;    // Counter to slow down animation speed
+    int dragonAnimationDelayTicks = 5; // << ADJUSTABLE: Change sprite frame every 5 game loop ticks.
+    // If gameLoop is ~60FPS, this means sprite animates at 60/5 = 12 FPS.
 
     // Variables for transitioning the images using alpha composite
     private Image currentDrawingBackground;
@@ -52,8 +63,9 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         int height = dragonHeight;
         Image img;
 
-        Dragon(Image img){
-            this.img = img;
+        Dragon(){
+            this.width = dragonFrameWidth;
+            this.height = dragonFrameHeight;
         }
     }
 
@@ -100,16 +112,16 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
         // Loading in the images
         background1Img = new ImageIcon("src/img/gamebg.png").getImage();
-        dragonImg = new ImageIcon("src/img/SPRITEFINAL.gif").getImage();
         topPipeImg = new ImageIcon("src/img/toppipefinal.png").getImage();
         bottomPipeImg = new ImageIcon("src/img/bottompipefinal.png").getImage();
         background2Img = new ImageIcon("src/img/background2.png").getImage();
         background3Img = new ImageIcon("src/img/background3.png").getImage();
         gameOverImg = new ImageIcon("src/img/gameover.png").getImage(); // Load game over image
-
+        dragonSpriteSheet = new ImageIcon("src/img/dragon_spritesheet3.png").getImage();
         currentDrawingBackground = background1Img;
+
         // Handle dragon and pipes
-        dragon = new Dragon(dragonImg);
+        dragon = new Dragon();
         pipes = new ArrayList<>();
 
         // Buttons on top during game play
@@ -392,7 +404,31 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     public void drawGameElements(Graphics g){
         // Dragon
-        g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, this);
+        //g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, this);
+
+        // --- UPDATE DRAGON DRAWING ---
+        if (dragonSpriteSheet != null) {
+            // Calculate the source coordinates (sx1, sy1, sx2, sy2) from the sprite sheet
+            // This assumes your sprite sheet frames are arranged in a single horizontal row.
+            int sx1 = dragonCurrentFrame * dragonFrameWidth;
+            int sy1 = 0; // If you have multiple rows, sy1 calculation would be: (currentRow * dragonFrameHeight)
+            int sx2 = sx1 + dragonFrameWidth;
+            int sy2 = sy1 + dragonFrameHeight; // Or simply sy1 + dragonFrameHeight if frames are in one row.
+
+            // Destination coordinates (dx1, dy1, dx2, dy2) on the panel
+            // This uses the dragon object's x,y position and the frame's width/height
+            int dx1 = dragon.x;
+            int dy1 = dragon.y;
+            // The width and height for drawing should be the frame's natural dimensions
+            int dx2 = dragon.x + dragonFrameWidth;
+            int dy2 = dragon.y + dragonFrameHeight;
+
+            g.drawImage(dragonSpriteSheet,
+                    dx1, dy1, dx2, dy2,   // Destination rectangle on the panel
+                    sx1, sy1, sx2, sy2,   // Source sub-rectangle from the sprite sheet
+                    this);                // ImageObserver (your panel)
+        }
+
 
         // Pipes
         for(int i = 0; i < pipes.size(); i++){
@@ -458,6 +494,15 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     public void actionPerformed(ActionEvent e) {
         if (!paused && !gameOver) {
             move();
+            //Dragon animation logic
+            dragonAnimationTick++;
+            if (dragonAnimationTick >= dragonAnimationDelayTicks) {
+                dragonAnimationTick = 0; // Reset the tick counter
+                dragonCurrentFrame++;    // Move to the next frame
+                if (dragonCurrentFrame >= dragonTotalFrames) {
+                    dragonCurrentFrame = 0; // Loop back to the first frame
+                }
+            }
         }
         repaint();
 
