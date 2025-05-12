@@ -21,8 +21,8 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     // Variables for Dragon Sprite Animation
     Image dragonSpriteSheet;
-    int dragonFrameWidth = 60;
-    int dragonFrameHeight = 60;
+    int dragonFrameWidth = 58;
+    int dragonFrameHeight = 58;
     int dragonTotalFrames = 3;
     int dragonCurrentFrame = 0;
 
@@ -117,7 +117,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         background2Img = new ImageIcon("src/img/background2.png").getImage();
         background3Img = new ImageIcon("src/img/background3.png").getImage();
         gameOverImg = new ImageIcon("src/img/gameover.png").getImage(); // Load game over image
-        dragonSpriteSheet = new ImageIcon("src/img/dragon_spritesheet3.png").getImage();
+        dragonSpriteSheet = new ImageIcon("src/img/SPRITEFINAL.png").getImage();
         currentDrawingBackground = background1Img;
 
         // Handle dragon and pipes
