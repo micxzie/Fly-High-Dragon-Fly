@@ -6,6 +6,21 @@ A Java-based Flappy Bird clone featuring a dragon character, smooth animations, 
 
 Fly High Dragon Fly is our creative take on the classic Flappy Bird game. Guide a dragon through pipes, collect points, and challenge yourself as the game progressively gets faster!
 
+## 📸 Screenshots
+
+<div align="center">
+
+### Main Menu
+![Main Menu](mkdir screenshots/menu.png)
+
+### Gameplay in Action
+![Gameplay](mkdir screenshots/gameplay.png)
+
+### Game Over
+![Game Over](mkdir screenshots/gameover.png)
+
+</div>
+
 ## ✨ Features
 
 - **Animated Dragon Sprite**: Smooth sprite-based animations for the dragon character
