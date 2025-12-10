@@ -1,6 +1,6 @@
 # Fly High Dragon Fly 🐉
 
-A Java-based Flappy Bird clone featuring a dragon character, smooth animations, and progressive difficulty. Created as a Machine Problem project for CMSC 11.
+A Java-based Flappy Bird clone featuring a dragon character, smooth animations, and progressive difficulty. Created as a Machine Problem project for CMSC 12.
 
 ## 📝 About
 
@@ -122,9 +122,9 @@ Fly-High-Dragon-Fly/
 
 ## 📚 Course Information
 
-- **Course**: CMSC 11 (Introduction to Computer Science)
+- **Course**: CMSC 12 (Fundamentals of Programming 2)
 - **Project Type**: Machine Problem
-- **Academic Year**: [Add year]
+- **Academic Year**: 2024-2025
 
 ## 🛠️ Technologies Used
 
@@ -134,7 +134,7 @@ Fly-High-Dragon-Fly/
 
 ## 📄 License
 
-This project is created for educational purposes as part of CMSC 11 coursework.
+This project is created for educational purposes as part of CMSC 12 coursework.
 
 ## 🙏 Acknowledgments
 
