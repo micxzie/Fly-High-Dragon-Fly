@@ -11,13 +11,13 @@ Fly High Dragon Fly is our creative take on the classic Flappy Bird game. Guide 
 <div align="center">
 
 ### Main Menu
-![Main Menu](mkdir screenshots/menu.png)
+![Main Menu](screenshots/menu.png)
 
 ### Gameplay in Action
-![Gameplay](mkdir screenshots/gameplay.png)
+![Gameplay](screenshots/gameplay.png)
 
 ### Game Over
-![Game Over](mkdir screenshots/gameover.png)
+![Game Over](screenshots/gameover.png)
 
 </div>
 
