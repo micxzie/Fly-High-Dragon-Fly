@@ -27,7 +27,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     int dragonCurrentFrame = 0;
 
     int dragonAnimationTick = 0;    // Counter to slow down animation speed
-    int dragonAnimationDelayTicks = 5; // << ADJUSTABLE: Change sprite frame every 5 game loop ticks.
+    int dragonAnimationDelayTicks = 5; // Change sprite frame every 5 game loop ticks.
     // If gameLoop is ~60FPS, this means sprite animates at 60/5 = 12 FPS.
 
     // Variables for transitioning the images using alpha composite
@@ -61,7 +61,6 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         int y = DragonY;
         int width = dragonWidth;
         int height = dragonHeight;
-        Image img;
 
         Dragon(){
             this.width = dragonFrameWidth;
@@ -102,6 +101,13 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     boolean paused = false;
     JLabel resumeLabel = new JLabel("<html><div style='text-align: center;'>Press the Space bar<br>to resume</html>");
 
+    Thread speedUpThread;
+    volatile boolean keepSpeedThreadRunning = false; // volatile for visibility across threads
+    final int speedTimer = 10000; // 10 seconds
+    final int initialVelocity = -4;
+    final int incrementSpeed = -1;   // How much to change velocityX (e.g., -4 becomes -5)
+    final int maxSpeed = -10;
+
 
     FlyHighDragonFly(){
         setPreferredSize(new Dimension(boardWidth, boardHeight));
@@ -109,6 +115,9 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         addKeyListener(keyListener);
         addMouseListener(mouseListener);
         setLayout(null);
+
+        // Initialize pipe speed
+        this.velocityX = initialVelocity;
 
         // Loading in the images
         background1Img = new ImageIcon("src/img/gamebg.png").getImage();
@@ -158,11 +167,63 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         startGameTimers();
     }
 
+    private void startSpeedIncreaseThread() {
+        keepSpeedThreadRunning = true;
+        speedUpThread = new Thread(() -> {
+            System.out.println("Speed increase thread started.");
+            while (keepSpeedThreadRunning) {
+                try {
+                    Thread.sleep(speedTimer);
+                    if (keepSpeedThreadRunning && !gameOver && !paused) {
+                        SwingUtilities.invokeLater(() -> {
+                            if (!gameOver && !paused) {
+                                if (FlyHighDragonFly.this.velocityX > maxSpeed) {
+                                    FlyHighDragonFly.this.velocityX += incrementSpeed;
+                                    System.out.println("Pipe speed increased to: " + FlyHighDragonFly.this.velocityX);
+                                } else {
+                                    FlyHighDragonFly.this.velocityX = maxSpeed;
+                                    System.out.println("Pipe speed at MAX : " + FlyHighDragonFly.this.velocityX);
+                                }
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                    System.out.println("Speed increase thread interrupted and will stop.");
+                    break;
+                }
+            }
+            System.out.println("Speed increase thread finished.");
+        });
+        speedUpThread.setName("Speed Controller");
+        speedUpThread.start();
+    }
+
+    private void stopSpeedIncreaseThread() {
+        keepSpeedThreadRunning = false; // Signal the loop to terminate
+        if (speedUpThread != null && speedUpThread.isAlive()) {
+            System.out.println("Attempting to interrupt speed increase thread...");
+            speedUpThread.interrupt(); // Interrupt the Thread.sleep()
+            try {
+                speedUpThread.join(100); // Wait a short time for the thread to die
+                if (speedUpThread.isAlive()) {
+                    System.out.println("Speed increase thread did not die after interrupt and join.");
+                    // Consider more forceful termination or logging if it doesn't stop
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted while waiting for speed increase thread to join.");
+                Thread.currentThread().interrupt(); // Restore interrupt status
+            }
+        }
+        speedUpThread = null; // Allow for garbage collection
+        System.out.println("Speed increase thread stopped.");
+    }
+
     // Helper to start/resume game timers
     private void startGameTimers() {
         if (!paused && !gameOver) {
             placePipesTimer.start();
             gameLoop.start();
+            startSpeedIncreaseThread();
         }
     }
 
@@ -170,6 +231,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
     private void stopGameTimers() {
         placePipesTimer.stop();
         gameLoop.stop();
+        stopSpeedIncreaseThread();
     }
 
     public void buttons(){
@@ -211,6 +273,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         retryButton.setFocusable(false);
         add(retryButton);
         retryButton.addActionListener(e -> {
+            stopSpeedIncreaseThread();
             if (transitionTimer.isRunning()) { // Stop any ongoing transition
                 transitionTimer.stop();
                 isTransitioning = false;
@@ -221,6 +284,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             pipes.clear();
             score = 0;
             finalScore = 0;
+            this.velocityX = initialVelocity;
             currentDrawingBackground = background1Img; // Reset to initial background
             targetTransitionBackground = null;
             checkAndUpdateBackground();
@@ -232,6 +296,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         menuMiniButton.setFocusable(false);
         add(menuMiniButton);
         menuMiniButton.addActionListener(e -> {
+            stopGameTimers();
             JFrame gameFrame = (JFrame) SwingUtilities.getWindowAncestor(menuButton);
             gameFrame.setVisible(false);
             Menu menu = new Menu();
@@ -242,6 +307,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         playAgainButton.setFocusable(false);
         playAgainButton.setVisible(false);
         playAgainButton.addActionListener(e -> {
+            stopSpeedIncreaseThread();
             if (transitionTimer.isRunning()) { // Stop any ongoing transition
                 transitionTimer.stop();
                 isTransitioning = false;
@@ -252,6 +318,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
             pipes.clear();
             score = 0;
             finalScore = 0; // Reset final score
+            this.velocityX = initialVelocity;
             currentDrawingBackground = background1Img; // Reset to initial background
             targetTransitionBackground = null; // Clear any pending transition target
             checkAndUpdateBackground(); // Ensure correct background is set (should be background1Img)
@@ -275,7 +342,6 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
         });
         add(menuButton);
 
-        // Study this, how to store data
         addScore.setFocusable(false);
         addScore.setVisible(false);
         addScore.addActionListener(e -> {
@@ -292,7 +358,6 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     public void placePipes(){
         //note for random numbers: (0-1) * pipeHeight/2 -> generates number from (0 - 256);
-        //more on vid abt the calculations around 40:00 min mark
 
         int randomPipeY = (int)(pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2)); // every pipe has shifter upwards by a quarter of its height minus some random number
         int openingSpace = boardHeight/4;
@@ -323,7 +388,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
                     targetTransitionBackground = null;
                     transitionTimer.stop();
                 }
-                repaint(); //Trigger a repaint to draw the next frame of the transition
+                repaint();
             }
         });
     }
@@ -404,9 +469,7 @@ public class FlyHighDragonFly extends JPanel implements ActionListener{
 
     public void drawGameElements(Graphics g){
         // Dragon
-        //g.drawImage(dragonImg, dragon.x, dragon.y, dragon.width, dragon.height, this);
 
-        // --- UPDATE DRAGON DRAWING ---
         if (dragonSpriteSheet != null) {
             // Calculate the source coordinates (sx1, sy1, sx2, sy2) from the sprite sheet
             // This assumes your sprite sheet frames are arranged in a single horizontal row.

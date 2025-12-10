@@ -14,7 +14,7 @@ public class Leaderboard {
 
         for (ScoreEntry entry : scores) {
             Object[] row = {entry.getName(), entry.getDate(), entry.getScore()};
-            model.addRow(row); // ← make sure this is inside the loop!
+            model.addRow(row);
         }
 
         JTable table = new JTable(model);
